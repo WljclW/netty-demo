@@ -14,11 +14,18 @@ import java.util.List;
  * 服务端的阻塞模式的实现：
  *   1.ServerSocketChannel：调用open()创建服务端的通道，调用bind即可监听(绑定)特定的端口
  *   2.调用ServerSocketChannel.accept即可接收客户端的连接。但是如果没有客户端的连接请求，线程就
- *      会在这里阻塞住，知道有客户端请求连接；
+ *      会在这里阻塞住，直到有客户端请求连接；(直观的现象就是线程打印完connecting。。。就不动了)
+ *   3.SocketChannel的read方法也是阻塞式的，如果没有数据就等待(阻塞)。因此观察到的现象：
+ *      当有一个客户端来连接时会连接成功，服务端会打印"connected...."以及"before read....."，然
+ *      后就没动静了，因为read方法阻塞住了
+ *
  * */
 @Slf4j
 public class ServerBlock {
     public static void main(String[] args) throws IOException {
+        /*注解@Slf4j配置后提示找不到log，因此换一种方式*/
+        org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ServerBlock.class);
+
         ByteBuffer buffer = ByteBuffer.allocate(16);
         //服务端的网络通道,调用bind绑定端口
         ServerSocketChannel ssc = ServerSocketChannel.open();
@@ -35,7 +42,7 @@ public class ServerBlock {
             for (SocketChannel channel:channels){
                 //接收客户端发来的数据
                 log.debug("before read........{}",channel);
-                channel.read(buffer); /*read()方法也是阻塞的，没有数据就等待。线程停止运行*/
+                channel.read(buffer); /*read()方法也是阻塞的，没有数据就等待。直到线程停止运行*/
                 buffer.flip();
                 ByteBufferUtil.debugRead(buffer);
                 buffer.clear();

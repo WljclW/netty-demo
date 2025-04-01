@@ -1,3 +1,4 @@
+import c4.ServerBlock;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileInputStream;
@@ -8,6 +9,9 @@ import java.nio.channels.FileChannel;
 @Slf4j
 public class TestByteBuffer {
     public static void main(String[] args) {
+
+        org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestByteBuffer.class);
+
         //FileChannel
 //        try {
 //            /*step1：想读取文件，先拿到一个FileChannel.默认是从项目的根目录下找*/
