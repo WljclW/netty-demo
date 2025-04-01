@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import static c4.ByteBufferUtil.debugRead;
@@ -54,7 +55,7 @@ public class ServerSelector {
         /*4.注册自己感兴趣的事件*/
         sscKey.interestOps(SelectionKey.OP_ACCEPT);
         while(true){
-            /*5.selector在没有事件发生的时候阻塞，有事件发生时执行并返回*/
+            /*5.selector在没有事件发生的时候阻塞，有事件发生时恢复执行*/
             log.debug("selector阻塞中.......");
             int select = selector.select();
 //            int select = selector.selectNow(); //表示不阻塞，执行到时即使没有就绪的事件也立马返回
@@ -62,32 +63,49 @@ public class ServerSelector {
             log.debug("selector执行了.......{}",select);
             log.debug("selectionKeys的大小.......{}",selector.selectedKeys().size());
             log.debug("selectionKeys的大小.......{}",selector.keys().size());
+            /*6.处理事件。selectedKeys包含所有发生的事件*/
             /*这里对于发生事件的selectionKey遍历时需要使用 迭代器，因为在遍历的过程中涉及删除操作。*/
             Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
             while(iterator.hasNext()){
                 log.debug("遍历所有的selectionKey....");
                 SelectionKey selectionKey = iterator.next();
                 iterator.remove();
+//                selectionKey.cancel(); //事件发生后要麽处理、要麽取消，不能置之不理
                 log.debug("selectKey.......{}",selectionKey);
                 if(selectionKey.isAcceptable()){
+                    //对于accept事件，selectionKey对应的channel是ServerSocketChannel因为是服务端的
                     ServerSocketChannel serverChannel = (ServerSocketChannel)selectionKey.channel();
                     /*⚠注意：1. 只要accept成功就立马需要设置非阻塞模式，否则注册时候会报异常;
                     *       2. 每一次处理完一个通道的事件后，需要手动删除对应的SelectionKey，否则会出现 空指针异常*/
                     SocketChannel sc = serverChannel.accept();
                     log.debug("连接成功......{}",sc);
                     sc.configureBlocking(false);
+                    //以后sc这个SocketChannel的事件就由scKey来管理
                     SelectionKey scKey = sc.register(selector, 0, null);
                     scKey.interestOps(SelectionKey.OP_READ);
 //                    sc.configureBlocking(false); //这里出错，因为register方法在上两行已经调用，调用的时候通道sc还是阻塞模式，因此会报错
                     log.debug("connected....{}",sc);
                 }else if(selectionKey.isReadable()){
-                    SocketChannel sc = (SocketChannel) selectionKey.channel();
-                    log.debug("read....{}",sc);
-                    ByteBuffer buffer = ByteBuffer.allocate(16);
-                    sc.read(buffer);
-                    buffer.flip();
-                    debugRead(buffer);
-                    log.debug("deg....");
+                    /*对于读事件:首先拿到出发事件对应的channel；调用read方法读取数据到ByteBuffer*/
+                    try{
+                        SocketChannel sc = (SocketChannel) selectionKey.channel();
+                        log.debug("read....{}",sc);
+                        ByteBuffer buffer = ByteBuffer.allocate(16);
+                        int read = sc.read(buffer);
+                        //如果是异常读(比如客户端关闭等)，read方法会返回-1，此时需要把key取消(从selectedKeys中删除)
+//                        if(read==-1){
+//                            selectionKey.cancel();
+//                        }else{ //read返回值不是-1，说明正常读取到数据
+                            buffer.flip();
+                            debugRead(buffer);
+                        System.out.println(Charset.defaultCharset().decode(buffer));
+                        log.debug("deg....");
+//                        }
+                    }catch (IOException e){
+                        e.printStackTrace();
+                        //出现异常时(比如连接断开等)，需要将key取消(从selectedKeys中删除)
+                        selectionKey.cancel();
+                    }
                 }
             }
         }
