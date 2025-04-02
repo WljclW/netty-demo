@@ -39,7 +39,6 @@ import static c4.ByteBufferUtil.debugRead;
  *   ============================concurrent
  * 1. 维护的三个集合中，keys()是线程安全的；其他的两个selectedKeys()和canceledKeys()是线程不安全的
  * 2. 当某一个key的事件正在被selector处理时，对于该selectionKey感兴趣的事件的修改不会影响当前的处理，会影响后面对这个selectionKey的影响
- *
  * */
 public class ServerSelector {
     public static void main(String[] args) throws IOException {

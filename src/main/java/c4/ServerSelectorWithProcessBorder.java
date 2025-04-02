@@ -1,6 +1,8 @@
 package c4;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -19,6 +21,8 @@ import static c4.ByteBufferUtil.debugRead;
 @Slf4j
 public class ServerSelectorWithProcessBorder {
     public static void main(String[] args) throws IOException {
+        Logger log = LoggerFactory.getLogger(ServerSelectorWithProcessBorder.class);
+
         Selector selector = Selector.open();
         ServerSocketChannel ssc = ServerSocketChannel.open();
         ssc.configureBlocking(false);
@@ -36,7 +40,7 @@ public class ServerSelectorWithProcessBorder {
                     ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
                     SocketChannel sc = serverChannel.accept();
                     sc.configureBlocking(false);
-                    /*将一个ByteBuffer和某一个selectionKey关联起来*/
+                    /*将一个ByteBuffer和某一个selectionKey关联起来。否则ByteBuffer可能被其他的通道破坏*/
                     ByteBuffer buffer = ByteBuffer.allocate(16);
                     SelectionKey sk = sc.register(selector, 0, buffer);
                     sk.interestOps(SelectionKey.OP_READ);
@@ -44,18 +48,18 @@ public class ServerSelectorWithProcessBorder {
                     log.debug("read...");
                     try{
                         SocketChannel channel = (SocketChannel) key.channel();
-                        ByteBuffer buffer = (ByteBuffer) key.attachment();
+                        ByteBuffer buffer = (ByteBuffer) key.attachment(); //获取这个selectionKey关联的ByteBuffer
 //                        ByteBuffer buffer = ByteBuffer.allocate(16);
                         int read = channel.read(buffer);
                         if(read==-1){
                             key.cancel();
                         }else{
                             split(buffer);
-                            if(buffer.position()==buffer.limit()){
+                            if(buffer.position()==buffer.limit()){ //说明没有读完，ByteBuffer的容量太小了
                                 ByteBuffer newBuffer = ByteBuffer.allocate(buffer.capacity()*2);
                                 buffer.flip();
-                                newBuffer.put(buffer);
-                                key.attach(newBuffer);
+                                newBuffer.put(buffer); //将buffer中的数据复制到newBuffer中
+                                key.attach(newBuffer); //将新的ByteBuffer关联到selectionKey上
                             }
                             debugRead(buffer);
                             System.out.println(Charset.defaultCharset().decode(buffer));
