@@ -1,9 +1,8 @@
-package c4;
+package c4.BaseServerModel;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
 
 /**
  * 1.关于异常关闭：

@@ -5,6 +5,8 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static c4.ByteBufferUtil.debugRead;
@@ -23,9 +25,8 @@ public class Server {
         Worker[] workers = new Worker[2];
         for (int i = 0; i < 2; i++) {
             workers[i] = new Worker("worker-" + i);
-            workers[i].register();
         }
-        AtomicInteger atomicInteger = new AtomicInteger();
+        AtomicInteger index = new AtomicInteger();
         while(true){
             boss.select();
             Iterator<SelectionKey> iterator = boss.selectedKeys().iterator();
@@ -35,7 +36,8 @@ public class Server {
                 if(key.isAcceptable()){
                     SocketChannel channel = ssc.accept();
                     channel.configureBlocking(false);
-                    channel.register(workers[atomicInteger.getAndIncrement()%workers.length].selector, SelectionKey.OP_READ,null);
+                    //round robin算法
+                    workers[index.getAndIncrement() % workers.length].register(channel);
                 }
             }
         }
@@ -45,15 +47,27 @@ public class Server {
         private String name;
         private Selector selector;
         private Thread thread;
+        private volatile AtomicBoolean started = new AtomicBoolean(false);
+        private ConcurrentLinkedDeque<Runnable> queue = new ConcurrentLinkedDeque<Runnable>();
 
         public Worker(String name){
             this.name = name;
         }
 
-        public void register() throws IOException {
-            selector = Selector.open();
-            thread = new Thread(this, name);
-            thread.start();
+        public void register(SocketChannel channel) throws IOException {
+            if(started.compareAndSet(false, true)){
+                selector = Selector.open();
+                thread = new Thread(this, name);
+                thread.start();
+            }
+            queue.add(() -> {
+                try {
+                    channel.register(selector, SelectionKey.OP_READ, null);
+                } catch (ClosedChannelException e) {
+                    e.printStackTrace();
+                }
+            });
+            selector.wakeup();
         }
 
         @Override
@@ -61,6 +75,10 @@ public class Server {
             while(true){
                 try {
                     selector.select();
+                    Runnable poll = queue.poll();
+                    if(poll!=null){
+                        poll.run();
+                    }
                     Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
                     while(iterator.hasNext()){
                         SelectionKey key = iterator.next();

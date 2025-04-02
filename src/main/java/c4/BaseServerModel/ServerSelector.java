@@ -1,4 +1,4 @@
-package c4;
+package c4.BaseServerModel;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
