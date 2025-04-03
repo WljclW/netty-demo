@@ -45,32 +45,35 @@ public class ServerSelector {
         org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ServerSelector.class);
         /*1.创建Selector，用来管理多个channel*/
         Selector selector = Selector.open();
-        /*2.创建服务端的通道*/
+        /*2.创建服务端的通道 并 完成配置。包括：设置非阻塞、绑定端口*/
         ServerSocketChannel ssc = ServerSocketChannel.open();
         ssc.configureBlocking(false); //在Selector中注册的通道必须是非阻塞模式的
         ssc.bind(new InetSocketAddress(8080));
-        /*3.将通道注册到Selector*/
-        SelectionKey sscKey = ssc.register(selector, 0, null);
-        /*4.注册自己感兴趣的事件*/
+        /*3.将通道注册到Selector 并 指定这个channel感兴趣的事件。*/
+        SelectionKey sscKey = ssc.register(selector, 0, null); //可以在这个方法的形参2指定感兴趣的事件
         sscKey.interestOps(SelectionKey.OP_ACCEPT);
         while(true){
-            /*5.selector在没有事件发生的时候阻塞，有事件发生时恢复执行*/
+            /*5.执行select()。这个方法在 ①至少有一个SelectionKsy对应的通道就绪等待IO操作时 或者 ②当前的线程被中断时
+             返回。
+                底层会执行的逻辑：唤醒调用select()的Selector*/
             log.debug("selector阻塞中.......");
             int select = selector.select();
 //            int select = selector.selectNow(); //表示不阻塞，执行到时即使没有就绪的事件也立马返回
 //            int select = selector.select(3000); //阻塞等待3000毫秒就不等了，直接返回并继续向后执行
             log.debug("selector执行了.......{}",select);
-            log.debug("selectionKeys的大小.......{}",selector.selectedKeys().size());
-            log.debug("selectionKeys的大小.......{}",selector.keys().size());
+            log.debug("selectionKeys的大小.......{}",selector.selectedKeys().size()); //SelectedKeys是所有准备就绪的channel对应的SelectionKey集合
+            log.debug("selectionKeys的大小.......{}",selector.keys().size()); //keys是所有注册到Selector的channel对应的SelectionKet集合
             /*6.处理事件。selectedKeys包含所有发生的事件*/
-            /*这里对于发生事件的selectionKey遍历时需要使用 迭代器，因为在遍历的过程中涉及删除操作。*/
+            /*这里对于发生事件的selectionKey遍历时需要使用 迭代器，因为在遍历的过程中涉及删除操作(处理完一个SelectionKey时，需要手动删除)。*/
             Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
             while(iterator.hasNext()){
                 log.debug("遍历所有的selectionKey....");
+                /*6.1:依次拿到每一个SelectionKey，记录下来并从selectedKeys()删除*/
                 SelectionKey selectionKey = iterator.next();
                 iterator.remove();
 //                selectionKey.cancel(); //事件发生后要麽处理、要麽取消，不能置之不理
                 log.debug("selectKey.......{}",selectionKey);
+                /*6.2：根据SelectionKey是可读、可写、可连接？分别处理*/
                 if(selectionKey.isAcceptable()){
                     //对于accept事件，selectionKey对应的channel是ServerSocketChannel因为是服务端的
                     ServerSocketChannel serverChannel = (ServerSocketChannel)selectionKey.channel();

@@ -23,14 +23,21 @@ import java.nio.channels.SocketChannel;
  *      如果在connect执行过程中，该通道发生了写或者读操作，则会阻塞直到来凝结完成；
  *      如果SecurityManager检查发现被禁止、或者出现异常等，总之造成了连接失败，则通道会关闭。
  * 5.在此通道的读写操作要求，必须在connect方法成功之后调用，否则会抛出NotYetConnectedException异常
+ * 6.connect()：
+ *      如果是非阻塞模式，则如果方法执行时就立刻连接上了，就返回true；否则的话返回false;
+ *      如果是阻塞模式，则会等待直到连接成功 或者 发生I/O错误
+ * 7.服务端进程关闭的时候，客户端的后续逻辑 以及 服务端的后续逻辑？
  * */
 public class Client {
     public static void main(String[] args) throws IOException {
         SocketChannel sc = SocketChannel.open();
 //        sc.write(Charset.defaultCharset().encode("hello")); //错误的使用。源码注释说了，不能在没有连接的情况下使用SocketChannel的io操作
-        sc.connect(new InetSocketAddress("localhost",8080));
+        boolean localhost = sc.connect(new InetSocketAddress("localhost", 8080));
+        System.out.println("连接结果........."+localhost);
+        System.out.println("finishConnect()的返回"+sc.finishConnect());
         /*在这一步设置断点。1. 可以看到当客户端connect成功之后，服务端的反应；
         *                2. 在"Evaluate expression"中“sc.write(Charset.defaultSet.encode("message"))”看到服务端的接受情况*/
-        System.out.println("waiting......");
+        System.in.read();
+//        System.out.println("waiting......");
     }
 }

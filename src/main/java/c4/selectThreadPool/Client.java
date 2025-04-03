@@ -16,7 +16,8 @@ import java.nio.charset.Charset;
 public class Client {
     public static void main(String[] args) throws IOException {
         SocketChannel channel = SocketChannel.open();
-        channel.connect(new InetSocketAddress("localhost", 8080));
+        boolean localhost = channel.connect(new InetSocketAddress("localhost", 8080));
+        System.out.println("连接结果........."+localhost);
         channel.write(Charset.defaultCharset().encode("hellp"));
         System.out.println("dada");
     }
