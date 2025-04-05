@@ -1,4 +1,4 @@
-package netty_base;
+package netty_base.simpleExam;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandlerContext;
