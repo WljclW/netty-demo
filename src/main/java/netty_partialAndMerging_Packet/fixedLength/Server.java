@@ -11,6 +11,7 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
 /**
+ * []：服务端需要第一个位置添加“FixedLengthFrameDecoder(length)”类型的handler
  * @author mini-zch
  * @date 2025/4/8 17:32
  */
