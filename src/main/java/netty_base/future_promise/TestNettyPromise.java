@@ -7,12 +7,15 @@ import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class TestNettyPromise {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
+        Logger log = org.slf4j.LoggerFactory.getLogger(TestNettyPromise.class);
+
         /*1. 准备EventLoop对象。创建Promise时需要*/
         EventLoop eventLoop = new NioEventLoopGroup().next();
         /*2. 主动创建Promise，作为结果容器*/

@@ -9,10 +9,14 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringEncoder;
 import lombok.extern.slf4j.Slf4j;
+import netty_base.future_promise.TestNettyPromise;
+import org.slf4j.Logger;
 
 @Slf4j
 public class EventLoopClient {
     public static void main(String[] args) throws InterruptedException {
+        Logger log = org.slf4j.LoggerFactory.getLogger(EventLoopClient.class);
+
         ChannelFuture channelFuture = new Bootstrap()
                 .group(new NioEventLoopGroup())
                 .channel(NioSocketChannel.class)

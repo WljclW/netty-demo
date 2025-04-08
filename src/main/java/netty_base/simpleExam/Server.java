@@ -9,6 +9,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 import lombok.extern.slf4j.Slf4j;
+import netty_base.future_promise.TestNettyPromise;
+import org.slf4j.Logger;
 
 /**
  * @author mini-zch
@@ -17,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Server {
     public static void main(String[] args) {
+        Logger log = org.slf4j.LoggerFactory.getLogger(Server.class);
+
         /*1. 创建服务端的启动类*/
         new ServerBootstrap()
                 /*2. 指定用于parent(accept)以及child(client)的EventLoopGroup*/

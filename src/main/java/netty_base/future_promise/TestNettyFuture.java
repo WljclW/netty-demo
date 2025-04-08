@@ -5,6 +5,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -12,6 +14,8 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 public class TestNettyFuture {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
+        Logger log = LoggerFactory.getLogger(TestNettyFuture.class);
+
         /*1. 拿到NIO事件循环组的一个，代表着一个线程*/
         NioEventLoopGroup group = new NioEventLoopGroup();
         EventLoop eventLoop = group.next();

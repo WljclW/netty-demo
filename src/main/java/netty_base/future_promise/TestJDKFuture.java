@@ -1,6 +1,8 @@
 package netty_base.future_promise;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
 
@@ -13,6 +15,7 @@ import java.util.concurrent.*;
 @Slf4j
 public class TestJDKFuture {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
+        Logger log = LoggerFactory.getLogger(TestJDKFuture.class);
         /*1. 创建线程池*/
         ExecutorService service = Executors.newFixedThreadPool(2);
         /*2. 向线程池提交任务*/

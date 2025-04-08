@@ -6,6 +6,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringEncoder;
 import lombok.extern.slf4j.Slf4j;
+import netty_base.future_promise.TestNettyPromise;
+import org.slf4j.Logger;
 
 /**
  * @author mini-zch
@@ -14,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Client {
     public static void main(String[] args) throws InterruptedException {
+        Logger log = org.slf4j.LoggerFactory.getLogger(Client.class);
+
         new Bootstrap()
                 .group(new NioEventLoopGroup())
                 .channel(NioSocketChannel.class)

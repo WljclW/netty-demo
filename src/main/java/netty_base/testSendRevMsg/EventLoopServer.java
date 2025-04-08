@@ -11,6 +11,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
+import netty_base.future_promise.TestNettyPromise;
+import org.slf4j.Logger;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +32,8 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class EventLoopServer {
     public static void main(String[] args) {
+        Logger log = org.slf4j.LoggerFactory.getLogger(EventLoopClient.class);
+
         DefaultEventLoopGroup group = new DefaultEventLoopGroup(2);
         new ServerBootstrap()
 //                .group(new NioEventLoopGroup()) //这种方式下accept、read事件用的是同一个group

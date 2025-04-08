@@ -6,10 +6,14 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
+import netty_base.future_promise.TestNettyPromise;
+import org.slf4j.Logger;
 
 @Slf4j
 public class TestPipeline {
     public static void main(String[] args) {
+        Logger log = org.slf4j.LoggerFactory.getLogger(TestPipeline.class);
+
         new ServerBootstrap()
                 .group(new NioEventLoopGroup(),new NioEventLoopGroup(2))
                 .channel(NioServerSocketChannel.class)

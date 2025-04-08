@@ -11,6 +11,8 @@ import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
+import netty_base.future_promise.TestNettyPromise;
+import org.slf4j.Logger;
 
 import java.util.Scanner;
 
@@ -25,6 +27,8 @@ import java.util.Scanner;
 @Slf4j
 public class EventLoopClientExample {
     public static void main(String[] args) throws InterruptedException {
+        Logger log = org.slf4j.LoggerFactory.getLogger(EventLoopClientExample.class);
+
         NioEventLoopGroup group = new NioEventLoopGroup();
         ChannelFuture channelFuture = new Bootstrap()
                 .group(group)

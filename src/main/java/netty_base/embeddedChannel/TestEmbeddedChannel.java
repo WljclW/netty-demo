@@ -6,6 +6,8 @@ import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * EmbeddedChannel的作用：不用启动服务端、客户端，测试hancler的执行次序、功能
@@ -15,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TestEmbeddedChannel {
     public static void main(String[] args) {
+        Logger log = LoggerFactory.getLogger(TestEmbeddedChannel.class);
         ChannelInboundHandlerAdapter h1 = new ChannelInboundHandlerAdapter() {
             @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {

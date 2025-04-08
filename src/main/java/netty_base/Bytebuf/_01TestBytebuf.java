@@ -22,7 +22,7 @@ public class _01TestBytebuf {
         log(buf);
     }
 
-    private static void log(ByteBuf byteBuf){
+    public static void log(ByteBuf byteBuf){
         int length = byteBuf.readableBytes();
         int rows = length / 16 + (length % 15 == 0 ? 0 : 1)+4;
         StringBuilder buf = new StringBuilder(rows * 80 * 2)
